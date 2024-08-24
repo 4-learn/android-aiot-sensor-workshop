@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:gravity="center">
+
+    <!-- 運動圖片 -->
+    <ImageView
+        android:id="@+id/imageViewExercise"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:src="@drawable/jumping_jack_image"
+        android:layout_gravity="center"
+        android:layout_marginBottom="20dp"
+        android:adjustViewBounds="true"
+        android:scaleType="fitCenter" />
+
+    <!-- 顯示開合跳速度 -->
+    <TextView
+        android:id="@+id/textViewSpeed"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="當前速度: 0.0 rad/s"
+        android:textSize="24sp"
+        android:textColor="#000000"
+        android:layout_marginBottom="20dp"
+        android:layout_gravity="center" />
+
+    <!-- 進度條顯示最大速度 -->
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:max="100"
+        android:progress="0"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_marginBottom="20dp" />
+
+    <!-- 顯示反饋訊息 -->
+    <TextView
+        android:id="@+id/textViewFeedback"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="準備開始你的訓練！"
+        android:textSize="24sp"
+        android:textColor="#000000"
+        android:layout_marginBottom="20dp"
+        android:layout_gravity="center" />
+
+</LinearLayout>
+

@@ -3,63 +3,31 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp"
-    android:gravity="center">
+    android:gravity="center"
+    android:padding="16dp">
 
-    <!-- 顯示跑步者圖片 -->
-    <ImageView
-        android:id="@+id/runnerImageView"
-        android:layout_width="wrap_content"
-        android:layout_height="0dp"
-        android:src="@drawable/runner"
-        android:layout_gravity="center_horizontal"
-        android:layout_weight="1"
-        android:scaleType="centerInside"
-        android:adjustViewBounds="true"
-        android:layout_marginBottom="16dp" />
-
-    <!-- 顯示 X 軸加速度 -->
-    <TextView
-        android:id="@+id/textViewX"
+    <!-- 開始按鈕 -->
+    <Button
+        android:id="@+id/buttonStart"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="X: 0.0"
-        android:textSize="18sp"
-        android:textColor="#000000"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="8dp" />
+        android:text="開始"
+        android:layout_marginBottom="20dp" />
 
-    <!-- 顯示 Y 軸加速度 -->
-    <TextView
-        android:id="@+id/textViewY"
+    <!-- 停止按鈕 -->
+    <Button
+        android:id="@+id/buttonStop"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Y: 0.0"
-        android:textSize="18sp"
-        android:textColor="#000000"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="8dp" />
+        android:text="停止"
+        android:layout_marginBottom="20dp" />
 
-    <!-- 顯示 Z 軸加速度 -->
+    <!-- 顯示距離的 TextView -->
     <TextView
-        android:id="@+id/textViewZ"
+        android:id="@+id/textViewDistance"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Z: 0.0"
-        android:textSize="18sp"
-        android:textColor="#000000"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="8dp" />
-
-    <!-- 顯示步數 -->
-    <TextView
-        android:id="@+id/stepCountView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Steps: 0"
-        android:textSize="18sp"
-        android:textColor="#000000"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="16dp" />
+        android:text="Distance: 0.0 meters"
+        android:textSize="24sp" />
 
 </LinearLayout>

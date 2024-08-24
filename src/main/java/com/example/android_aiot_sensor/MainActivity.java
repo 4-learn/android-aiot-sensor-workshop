@@ -1,92 +1,100 @@
 package com.example.android_aiot_sensor;
 
-import android.app.Activity;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
-import android.widget.ImageView;
+import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
-public class MainActivity extends Activity implements SensorEventListener {
+public class MainActivity extends AppCompatActivity {
 
-    private SensorManager mSensorManager;
-    private Sensor mAccelerometer;
-    private TextView mTextViewX;
-    private TextView mTextViewY;
-    private TextView mTextViewZ;
-    private TextView mStepCountView;
-    private int stepCount = 0;
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
+    private LocationManager locationManager;
+    private Location startLocation, endLocation;
+    private TextView textViewDistance;
+    private Button buttonStart, buttonStop;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // 初始化 ImageView 和 TextView，用於顯示加速度計數據和步數
-        ImageView runnerImageView = findViewById(R.id.runnerImageView);
-        mTextViewX = findViewById(R.id.textViewX);
-        mTextViewY = findViewById(R.id.textViewY);
-        mTextViewZ = findViewById(R.id.textViewZ);
-        mStepCountView = findViewById(R.id.stepCountView);
+        // 初始化 UI 元素
+        textViewDistance = findViewById(R.id.textViewDistance);
+        buttonStart = findViewById(R.id.buttonStart);
+        buttonStop = findViewById(R.id.buttonStop);
 
-        // 設置 ImageView 以顯示 WebP 圖片
-        runnerImageView.setImageResource(R.drawable.runner);
+        // 獲取 LocationManager 實例
+        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 
-        // 初始化顯示的初始值
-        mTextViewX.setText("X: 0.0");
-        mTextViewY.setText("Y: 0.0");
-        mTextViewZ.setText("Z: 0.0");
-        mStepCountView.setText("Steps: 0");
+        // 檢查位置權限
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
+        }
 
-        // 獲取 SensorManager 實例
-        mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        // "開始" 按鈕點擊事件
+        buttonStart.setOnClickListener(v -> {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+                Toast.makeText(this, "開始位置已記錄", Toast.LENGTH_SHORT).show();
+            }
+        });
 
-        // 獲取加速度計感測器
-        mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-
-        // 註冊感測器監聽器，監聽加速度計數據變化
-        mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+        // "停止" 按鈕點擊事件
+        buttonStop.setOnClickListener(v -> {
+            if (startLocation != null && endLocation != null) {
+                float distance = startLocation.distanceTo(endLocation); // 計算兩點間距離
+                textViewDistance.setText("Distance: " + distance + " meters");
+                locationManager.removeUpdates(locationListener); // 停止位置更新
+                Toast.makeText(this, "距離已計算", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "請先記錄起始位置和結束位置", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        // 當 Activity 重新啟動時，重新註冊感測器監聽器
-        mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        // 當 Activity 暫停時，解除感測器監聽器的註冊
-        mSensorManager.unregisterListener(this);
-    }
-
-    @Override
-    public void onSensorChanged(SensorEvent event) {
-        // 當加速度計數據變化時調用，處理加速度計數據
-        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-            float x = event.values[0];
-            float y = event.values[1];
-            float z = event.values[2];
-
-            // 更新 TextView 顯示加速度計數據
-            mTextViewX.setText("X: " + x);
-            mTextViewY.setText("Y: " + y);
-            mTextViewZ.setText("Z: " + z);
-
-            // 假設當 Z 軸的變化超過某個閾值時計數為一步
-            if (Math.abs(z) > 10) { // 閾值可以根據需求調整
-                stepCount++;
-                mStepCountView.setText("Steps: " + stepCount);
+    private final LocationListener locationListener = new LocationListener() {
+        @Override
+        public void onLocationChanged(@NonNull Location location) {
+            if (startLocation == null) {
+                startLocation = location; // 記錄起跑位置
+            } else {
+                endLocation = location; // 記錄結束位置
             }
         }
-    }
+
+        @Override
+        public void onStatusChanged(String provider, int status, Bundle extras) {
+            // 可在此處處理提供者狀態變更
+        }
+
+        @Override
+        public void onProviderEnabled(@NonNull String provider) {
+            Toast.makeText(MainActivity.this, "GPS 已啟用", Toast.LENGTH_SHORT).show();
+        }
+
+        @Override
+        public void onProviderDisabled(@NonNull String provider) {
+            Toast.makeText(MainActivity.this, "GPS 已禁用", Toast.LENGTH_SHORT).show();
+        }
+    };
 
     @Override
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {
-        // 在感測器精度變化時調用（本範例中不需要處理）
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(this, "權限已授予", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "權限被拒絕", Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 }

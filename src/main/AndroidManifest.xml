@@ -28,16 +28,13 @@
         </activity>
 
         <!-- 新增 ProfileActivity -->
-        <activity
-            android:name=".ProfileActivity"
-            android:exported="false">
-        </activity>
+        <activity android:name=".ProfileActivity" android:exported="false" />
 
         <!-- 新增 RunningActivity -->
-        <activity
-            android:name=".RunningActivity"
-            android:exported="false">
-        </activity>
+        <activity android:name=".RunningActivity" android:exported="false" />
+
+        <!-- 新增 DashboardActivity -->
+        <activity android:name=".DashboardActivity" android:exported="false" />
 
     </application>
 

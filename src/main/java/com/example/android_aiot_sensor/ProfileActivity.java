@@ -1,42 +1,40 @@
 package com.example.android_aiot_sensor;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
+import android.content.Intent;
 
 public class ProfileActivity extends Activity {
 
-    private EditText editTextHeight, editTextWeight;
-    private Button buttonSaveProfile;
+    private EditText editTextName, editTextHeight, editTextWeight;
+    private Button btnSaveProfile;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
 
+        // 初始化 UI 元件
+        editTextName = findViewById(R.id.editTextName);
         editTextHeight = findViewById(R.id.editTextHeight);
         editTextWeight = findViewById(R.id.editTextWeight);
-        buttonSaveProfile = findViewById(R.id.buttonSaveProfile);
+        btnSaveProfile = findViewById(R.id.btnSaveProfile);
 
-        buttonSaveProfile.setOnClickListener(v -> {
-            String heightStr = editTextHeight.getText().toString();
-            String weightStr = editTextWeight.getText().toString();
+        btnSaveProfile.setOnClickListener(v -> saveProfile());
+    }
 
-            if (!heightStr.isEmpty() && !weightStr.isEmpty()) {
-                float height = Float.parseFloat(heightStr);
-                float weight = Float.parseFloat(weightStr);
+    private void saveProfile() {
+        String name = editTextName.getText().toString();
+        float height = Float.parseFloat(editTextHeight.getText().toString());
+        float weight = Float.parseFloat(editTextWeight.getText().toString());
 
-                Intent resultIntent = new Intent();
-                resultIntent.putExtra("height", height);
-                resultIntent.putExtra("weight", weight);
-                setResult(RESULT_OK, resultIntent);
-                finish();
-            } else {
-                Toast.makeText(ProfileActivity.this, "請輸入所有資料", Toast.LENGTH_SHORT).show();
-            }
-        });
+        Intent intent = new Intent();
+        intent.putExtra("name", name);
+        intent.putExtra("height", height);
+        intent.putExtra("weight", weight);
+        setResult(RESULT_OK, intent);
+        finish();
     }
 }

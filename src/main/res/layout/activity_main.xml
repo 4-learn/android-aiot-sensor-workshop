@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <!-- 模擬指南針圖標，用於顯示方位角 -->
+    <ImageView
+        android:id="@+id/compassImageView"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:src="@drawable/ic_compass"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="40dp" />
+
+    <!-- 圓形進度條，用於顯示俯仰角 -->
+    <ProgressBar
+        android:id="@+id/progressBarPitch"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_below="@id/compassImageView"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="40dp"
+        android:indeterminate="false"
+        android:max="90"
+        android:progress="0"
+        android:progressDrawable="@drawable/circular_progress_bar" />
+
+    <!-- 顯示警告訊息 -->
+    <TextView
+        android:id="@+id/textViewWarning"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="請保持正確姿勢"
+        android:textSize="18sp"
+        android:textColor="#FF0000"
+        android:layout_below="@id/progressBarPitch"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp"
+        android:visibility="gone" />
+
+    <!-- 開始/停止按鈕 -->
+    <Button
+        android:id="@+id/buttonStartStop"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="開始監控"
+        android:layout_below="@id/textViewWarning"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="30dp" />
+
+</RelativeLayout>
+

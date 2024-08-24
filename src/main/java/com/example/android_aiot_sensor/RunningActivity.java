@@ -1,0 +1,149 @@
+ package com.example.android_aiot_sensor;
+
+import android.app.Activity;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import android.os.Bundle;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
+import android.content.pm.PackageManager;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.annotation.NonNull;
+
+public class RunningActivity extends Activity implements SensorEventListener {
+
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
+    private SensorManager mSensorManager;
+    private Sensor mAccelerometer;
+    private LocationManager locationManager;
+    private Location startLocation, endLocation;
+    private TextView mStatusTextView;
+    private int stepCount = 0;
+    private float userHeight, userWeight;
+    private Button buttonStart, buttonStop;
+    private ImageView runnerImageView;  // 新增 ImageView
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_running);  // 確認使用正確的布局文件
+
+        // 初始化 UI 元素
+        runnerImageView = findViewById(R.id.runnerImageView);
+        mStatusTextView = findViewById(R.id.statusTextView);
+        buttonStart = findViewById(R.id.buttonStart);
+        buttonStop = findViewById(R.id.buttonStop);
+
+        // 設置 ImageView 以顯示 WebP 圖片
+        runnerImageView.setImageResource(R.drawable.runner);
+
+        // 初始化感測器和位置服務
+        mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+
+        checkLocationPermission();
+
+        buttonStart.setOnClickListener(v -> {
+            startLocation = null;
+            endLocation = null;
+            stepCount = 0;
+            mStatusTextView.setText("開始慢跑");
+
+            if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+                mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+            } else {
+                Toast.makeText(this, "請授予位置權限", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        buttonStop.setOnClickListener(v -> {
+            locationManager.removeUpdates(locationListener);
+            mSensorManager.unregisterListener(this);
+            if (startLocation != null && endLocation != null) {
+                float distance = startLocation.distanceTo(endLocation);
+                float caloriesBurned = calculateCalories(distance, stepCount, userWeight);
+                mStatusTextView.setText("距離: " + distance + "米\n步數: " + stepCount + "\n消耗的熱量: " + caloriesBurned + " kcal");
+            } else {
+                mStatusTextView.setText("未能計算距離");
+            }
+        });
+    }
+
+    private float calculateCalories(float distance, int steps, float weight) {
+        return (distance / 1000) * weight * 1.036f;
+    }
+
+    private void checkLocationPermission() {
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(this, "權限已授予", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "權限被拒絕", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    private final LocationListener locationListener = new LocationListener() {
+        @Override
+        public void onLocationChanged(Location location) {
+            if (startLocation == null) {
+                startLocation = location;
+            } else {
+                endLocation = location;
+            }
+        }
+
+        @Override
+        public void onStatusChanged(String provider, int status, Bundle extras) {}
+
+        @Override
+        public void onProviderEnabled(String provider) {}
+
+        @Override
+        public void onProviderDisabled(String provider) {}
+    };
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        locationManager.removeUpdates(locationListener);
+        mSensorManager.unregisterListener(this);
+    }
+
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+            float z = event.values[2];
+            if (Math.abs(z) > 10) {
+                stepCount++;
+            }
+        }
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {}
+}
+

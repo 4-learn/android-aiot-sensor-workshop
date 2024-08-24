@@ -3,48 +3,57 @@ package com.example.android_aiot_sensor;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Button;
-import android.widget.Toast;
+
+import java.util.ArrayList;
 
 public class MainActivity extends Activity {
 
-    private static final int PROFILE_REQUEST_CODE = 2;
+    private Button btnDashboard, btnHome, btnSetProfile;
+    private ArrayList<String> eventHistory = new ArrayList<>();
+    private static final int REQUEST_CODE_POSTURE = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Button btnDashboard = findViewById(R.id.btn_dashboard);
-        Button btnHome = findViewById(R.id.btn_home);
-        Button btnSetProfile = findViewById(R.id.btn_set_profile);
+        // 初始化 UI 元件
+        btnDashboard = findViewById(R.id.btn_dashboard);
+        btnHome = findViewById(R.id.btn_home);
+        btnSetProfile = findViewById(R.id.btn_set_profile);
 
-        // 設置按鈕事件
-        btnDashboard.setOnClickListener(v -> {
-            Toast.makeText(MainActivity.this, "功能尚在開發中", Toast.LENGTH_SHORT).show();
-        });
+        // 設定按鈕的點擊事件
+        btnDashboard.setOnClickListener(v -> openDashboard());
+        btnHome.setOnClickListener(v -> openPostureDetection());
+        btnSetProfile.setOnClickListener(v -> openProfileSettings());
+    }
 
-        btnHome.setOnClickListener(v -> {
-            // 開啟 RunningActivity 來顯示 GPS 慢跑 APP 的功能
-            Intent intent = new Intent(MainActivity.this, RunningActivity.class);
-            startActivity(intent);
-        });
+    private void openDashboard() {
+        Intent intent = new Intent(MainActivity.this, DashboardActivity.class);
+        intent.putStringArrayListExtra("eventHistory", eventHistory);  // 傳遞事件歷史紀錄
+        startActivity(intent);
+    }
 
-        btnSetProfile.setOnClickListener(v -> {
-            // 開啟 ProfileActivity 來設定使用者資料
-            Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
-            startActivityForResult(intent, PROFILE_REQUEST_CODE);
-        });
+    private void openPostureDetection() {
+        Intent intent = new Intent(MainActivity.this, PostureDetectionActivity.class);
+        startActivityForResult(intent, REQUEST_CODE_POSTURE);
+    }
+
+    private void openProfileSettings() {
+        Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
+        startActivity(intent);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == PROFILE_REQUEST_CODE && resultCode == RESULT_OK) {
-            // 可以處理從 ProfileActivity 返回的數據，例如更新使用者資料
-            float userHeight = data.getFloatExtra("height", 0);
-            float userWeight = data.getFloatExtra("weight", 0);
-            // 此處可以將身高體重保存到 SharedPreferences 或類似的儲存位置
+        if (requestCode == REQUEST_CODE_POSTURE && resultCode == RESULT_OK) {
+            ArrayList<String> newEvents = data.getStringArrayListExtra("eventHistory");
+            if (newEvents != null) {
+                eventHistory.addAll(newEvents);  // 更新主頁面的事件歷史記錄
+            }
         }
     }
 }
